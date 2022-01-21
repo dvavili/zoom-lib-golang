@@ -33,7 +33,8 @@ func AddMembers(opts AddMemberOptions) (ResopnseAddGroupMembers, error) {
 // https://marketplace.zoom.us/docs/api-reference/zoom-api/groups/groupmemberscreate
 func (c *Client) AddMembers(opts AddMemberOptions) (ResopnseAddGroupMembers, error) {
 	var ret = ResopnseAddGroupMembers{}
-	return ret, c.requestV2(requestV2Opts{
+	return ret, c.RequestV2(
+		RequestV2Opts{
 		Method:         Post,
 		Path:           fmt.Sprintf(AddMenbersPath, opts.GroupID),
 		DataParameters: &opts,

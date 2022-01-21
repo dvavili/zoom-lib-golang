@@ -56,7 +56,7 @@ func NewClient(apiKey string, apiSecret string) *Client {
 	}
 }
 
-type requestV2Opts struct {
+type RequestV2Opts struct {
 	Client         *Client
 	Method         HTTPMethod
 	URLParameters  interface{}
@@ -79,9 +79,9 @@ func initializeDefault(c *Client) *Client {
 	return c
 }
 
-func (c *Client) executeRequest(opts requestV2Opts) (*http.Response, error) {
-	client := c.httpClient()
-	req, err := c.addRequestAuth(c.httpRequest(opts))
+func (c *Client) ExecuteRequest(opts RequestV2Opts) (*http.Response, error) {
+	client := c.HttpClient()
+	req, err := c.addRequestAuth(c.HttpRequest(opts))
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *Client) executeRequest(opts requestV2Opts) (*http.Response, error) {
 	return client.Do(req)
 }
 
-func (c *Client) httpRequest(opts requestV2Opts) (*http.Request, error) {
+func (c *Client) HttpRequest(opts RequestV2Opts) (*http.Request, error) {
 	var buf bytes.Buffer
 
 	// encode body parameters if any
@@ -121,7 +121,7 @@ func (c *Client) httpRequest(opts requestV2Opts) (*http.Request, error) {
 	return http.NewRequest(string(opts.Method), requestURL, &buf)
 }
 
-func (c *Client) httpClient() *http.Client {
+func (c *Client) HttpClient() *http.Client {
 	client := &http.Client{Transport: c.Transport}
 	if c.Timeout > 0 {
 		client.Timeout = c.Timeout
@@ -130,25 +130,25 @@ func (c *Client) httpClient() *http.Client {
 	return client
 }
 
-func (c *Client) requestV2(opts requestV2Opts) error {
+func (c *Client) RequestV2(opts RequestV2Opts) error {
 	// make sure the defaultClient is not nil if we are using it
 	c = initializeDefault(c)
 
 	// execute HTTP request
-	resp, err := c.executeRequest(opts)
+	resp, err := c.ExecuteRequest(opts)
 	if err != nil {
 		return err
 	}
 
 	// If there is no body in response
 	if opts.HeadResponse {
-		return c.requestV2HeadOnly(resp)
+		return c.RequestV2HeadOnly(resp)
 	}
 
-	return c.requestV2WithBody(opts, resp)
+	return c.RequestV2WithBody(opts, resp)
 }
 
-func (c *Client) requestV2WithBody(opts requestV2Opts, resp *http.Response) error {
+func (c *Client) RequestV2WithBody(opts RequestV2Opts, resp *http.Response) error {
 	// read HTTP response
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -169,7 +169,7 @@ func (c *Client) requestV2WithBody(opts requestV2Opts, resp *http.Response) erro
 	return json.Unmarshal(body, &opts.Ret)
 }
 
-func (c *Client) requestV2HeadOnly(resp *http.Response) error {
+func (c *Client) RequestV2HeadOnly(resp *http.Response) error {
 	if resp.StatusCode != 204 {
 		return errors.New(resp.Status)
 	}
